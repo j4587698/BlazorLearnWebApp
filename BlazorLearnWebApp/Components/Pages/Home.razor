@@ -1,0 +1,17 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>@hello</h1>
+
+<Button Text="点我" OnClick="ClickMe"></Button>
+
+
+@code {
+    private string hello = "Hello";
+    private void ClickMe()
+    {
+        hello = "Hello World";
+    }
+    
+}

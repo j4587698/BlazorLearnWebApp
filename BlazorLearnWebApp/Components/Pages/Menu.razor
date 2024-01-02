@@ -1,0 +1,80 @@
+﻿@page "/menu"
+@using BlazorLearnWebApp.Entity
+@inject IDataService<MenuEntity> DataService
+
+@attribute [TabItemOption(Text = "菜单管理")]
+<AdminTable TItem="MenuEntity" OnSaveAsync="OnSaveAsync" OnDeleteAsync="OnDeleteAsync" IsTree="true" TreeNodeConverter="TreeNodeConverter">
+    <TableColumns>
+        <TableColumn @bind-Field="@context.MenuName"></TableColumn>
+        <TableColumn @bind-Field="@context.Icon"></TableColumn>
+        <TableColumn @bind-Field="@context.Url"></TableColumn>
+        <TableColumn @bind-Field="@context.ParentId" Visible="false" Text="父菜单">
+            <EditTemplate Context="value">
+                <div class="col-12 col-sm-6 col-md-6">
+                <SelectTree @bind-Value="value.ParentId" Items="Items" DisplayText="父菜单"></SelectTree>
+                </div>
+            </EditTemplate>
+        </TableColumn>
+    </TableColumns>
+</AdminTable>
+
+@code {
+
+    private List<TreeViewItem<int>> Items { get; set; } = new List<TreeViewItem<int>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await RefreshItems();
+    }
+
+    private async Task RefreshItems()
+    {
+        Items.Clear();
+        var menus = await MenuEntity.Select.ToListAsync();
+        Items.Add(new TreeViewItem<int>(0){Text = "顶级菜单"});
+        Items.AddRange(CascadingMenu(menus, 0));
+    }
+
+    private List<TreeViewItem<int>> CascadingMenu(List<MenuEntity> menuEntities, int parentId) => menuEntities
+        .Where(x => x.ParentId == parentId)
+        .Select(x => new TreeViewItem<int>(x.Id) { Text = x.MenuName, Items = CascadingMenu(menuEntities, x.Id) })
+        .ToList();
+
+
+    private async Task<bool> OnSaveAsync(MenuEntity arg1, ItemChangedType arg2)
+    {
+        await arg1.SaveAsync();
+        await RefreshItems();
+        return true;
+    }
+
+    private async Task<bool> OnDeleteAsync(IEnumerable<MenuEntity> arg)
+    {
+        if (await DataService.DeleteAsync(arg))
+        {
+            await RefreshItems();
+            return true;
+        }
+        return false;
+    }
+
+    private Task<IEnumerable<TableTreeNode<MenuEntity>>> TreeNodeConverter(IEnumerable<MenuEntity> items)
+    {
+        // 构造树状数据结构
+        var ret = BuildTreeNodes(items, 0);
+        return Task.FromResult(ret);
+
+        IEnumerable<TableTreeNode<MenuEntity>> BuildTreeNodes(IEnumerable<MenuEntity> items, int parentId)
+        {
+            var ret = new List<TableTreeNode<MenuEntity>>();
+            ret.AddRange(items.Where(i => i.ParentId == parentId).Select((menu, index) => new TableTreeNode<MenuEntity>(menu)
+            {
+                HasChildren = items.Any(x => x.ParentId == menu.Id),
+                Items = BuildTreeNodes(items, menu.Id)
+            }));
+            return ret;
+        }
+    }
+
+}

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BootstrapBlazor" Version="8.0.6-beta02" />
+    <PackageReference Include="BootstrapBlazor.FontAwesome" Version="8.0.1" />
+    <PackageReference Include="FreeSql.Extensions.BaseEntity" Version="3.2.806-preview20231213" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.2.806-preview20231213" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,31 @@
+﻿@page "/role"
+@using BlazorLearnWebApp.Entity
+@inject DialogService DialogService
+
+@attribute [TabItemOption(Text = "角色管理")]
+
+<AdminTable TItem="RoleEntity" ShowExtendEditButtonCallback="@(entity => entity.RoleName != "管理员")" 
+            ShowExtendDeleteButtonCallback="@(entity => entity.RoleName != "管理员")">
+    <TableColumns>
+        <TableColumn @bind-Field="@context.RoleName"></TableColumn>
+    </TableColumns>
+    <BeforeRowButtonTemplate Context="value">
+        <TableCellButton Text="编辑菜单" OnClick="() => EditMenu(value.Id)"></TableCellButton>
+    </BeforeRowButtonTemplate>
+</AdminTable>
+
+
+@code {
+
+    private void EditMenu(int roleId)
+    {
+        DialogService.ShowModal<EditMenu>(new ResultDialogOption()
+        {
+            ComponentParameters = new Dictionary<string, object>()
+            {
+                [nameof(Components.EditMenu.RoleId)] = roleId,
+            }
+        });
+    }
+
+}

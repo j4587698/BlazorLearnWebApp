@@ -1,0 +1,52 @@
+﻿@page "/user"
+@using BlazorLearnWebApp.Components.Components
+@using BlazorLearnWebApp.Entity
+
+@inject IDataService<UserEntity> DataService
+@inject SwalService SwalService
+
+@attribute [TabItemOption(Text = "用户管理", Icon = "fa-fw fa-solid fa-desktop")]
+<AdminTable TItem="UserEntity" OnSaveAsync="OnSaveAsync">
+    <TableColumns>
+        <TableColumn @bind-Field="@context.UserName" IsReadonlyWhenEdit="true"></TableColumn>
+        <TableColumn @bind-Field="@context.NickName"></TableColumn>
+    </TableColumns>
+    <RowButtonTemplate Context="value">
+        <TableCellPopconfirmButton Text="重置密码" Content=@($"你是否要重置{value.UserName}的密码？") OnConfirm="() => ResetPassword(value)"></TableCellPopconfirmButton>
+    </RowButtonTemplate>
+</AdminTable>
+@code {
+
+    private async Task<bool> OnSaveAsync(UserEntity arg1, ItemChangedType arg2)
+    {
+        if (arg2 == ItemChangedType.Add)
+        {
+            arg1.Password = arg1.UserName;
+        }
+        var ret = await DataService.SaveAsync(arg1, arg2);
+        if (ret && arg2 == ItemChangedType.Add)
+        {
+            await SwalService.Show(new SwalOption()
+            {
+                Category = SwalCategory.Success,
+                Title = "添加用户成功",
+                Content = $"您的密码是{arg1.UserName}"
+            });
+        }
+
+        return ret;
+    }
+
+    private async Task ResetPassword(UserEntity user)
+    {
+        user.Password = user.UserName;
+        await user.SaveAsync();
+        await SwalService.Show(new SwalOption()
+        {
+            Category = SwalCategory.Success,
+            Title = "重置密码成功",
+            Content = $"您的密码是{user.UserName}"
+        });
+    }
+
+}
