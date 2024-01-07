@@ -16,6 +16,7 @@ builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
 builder.Services.AddBootstrapBlazor();
 builder.Services.AddScoped(typeof(IDataService<>), typeof(FreesqlDataService<>));
+builder.Services.AddSingleton(typeof(ILookupService), typeof(LookupService));
 
 var app = builder.Build();
 

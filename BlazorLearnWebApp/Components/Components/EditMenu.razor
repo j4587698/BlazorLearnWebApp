@@ -10,8 +10,7 @@
 
     [Parameter]
     public int RoleId { get; set; }
-
-    [NotNull]
+    
     private RoleEntity? RoleEntity { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -34,7 +33,7 @@
         {
             var treeViewItem = new TreeViewItem<MenuEntity>(x) { Text = x.MenuName, Icon = x.Icon, IsExpand = true, Parent = parent };
             treeViewItem.Items = CascadingMenu(menuEntities, treeViewItem);
-            if (RoleEntity.Menus?.Any(y => y.Id == x.Id) == true)
+            if (RoleEntity?.Menus?.Any(y => y.Id == x.Id) == true)
             {
                 treeViewItem.CheckedState = CheckboxState.Checked;
             }
@@ -48,7 +47,7 @@
         {
             var menus = new List<MenuEntity>();
             GetMenus(Items.Where(x => x.CheckedState != CheckboxState.UnChecked), menus);
-            RoleEntity.Menus = menus;
+            RoleEntity!.Menus = menus;
             await RoleEntity.SaveManyAsync(nameof(RoleEntity.Menus));
         }
     }

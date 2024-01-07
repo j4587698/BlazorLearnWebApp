@@ -10,6 +10,7 @@
     <TableColumns>
         <TableColumn @bind-Field="@context.UserName" IsReadonlyWhenEdit="true"></TableColumn>
         <TableColumn @bind-Field="@context.NickName"></TableColumn>
+        <TableColumn @bind-Field="@context.RoleId" Text="角色" LookupServiceKey="role"></TableColumn>
     </TableColumns>
     <RowButtonTemplate Context="value">
         <TableCellPopconfirmButton Text="重置密码" Content=@($"你是否要重置{value.UserName}的密码？") OnConfirm="() => ResetPassword(value)"></TableCellPopconfirmButton>
