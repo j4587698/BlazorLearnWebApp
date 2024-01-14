@@ -2,6 +2,7 @@ using BlazorLearnWebApp.Components;
 using BlazorLearnWebApp.Service;
 using BootstrapBlazor.Components;
 using FreeSql;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,13 +12,18 @@ IFreeSql fsql = new FreeSql.FreeSqlBuilder()
 	.Build(); //be sure to define as singleton mode
 BaseEntity.Initialization(fsql, null);
 
+builder.Services.AddControllers();
 // Add services to the container.
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
 builder.Services.AddBootstrapBlazor();
 builder.Services.AddScoped(typeof(IDataService<>), typeof(FreesqlDataService<>));
 builder.Services.AddSingleton(typeof(ILookupService), typeof(LookupService));
-
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(config =>
+{
+	config.LoginPath = "/Login";
+});
+builder.Services.AddCascadingAuthenticationState();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,6 +39,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapDefaultControllerRoute();
 app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode();
 

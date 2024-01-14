@@ -1,4 +1,10 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 
@@ -6,12 +12,26 @@
 
 <Button Text="点我" OnClick="ClickMe"></Button>
 
+@(_user?.Identity?.IsAuthenticated == true ? "已登录" :"未登录")
 
 @code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private ClaimsPrincipal _user;
+    
     private string hello = "Hello";
     private void ClickMe()
     {
         hello = "Hello World";
     }
-    
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        _user = (await AuthenticationStateTask).User;
+    }
+
 }

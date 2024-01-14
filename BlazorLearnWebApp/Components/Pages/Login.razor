@@ -1,0 +1,58 @@
+﻿@page "/Login"
+@using BlazorLearnWebApp.Components.Layout
+@using BlazorLearnWebApp.Vo
+@layout LoginLayout
+@inject AjaxService AjaxService
+@inject SwalService SwalService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<div class="login-item login-item-floating">
+    <div class="text-center">
+        <h4 class="text-dark">欢迎观看从零开始Blazor Server系列视频</h4>
+        <h4 class="text-dark">用户登录!</h4>
+    </div>
+    <ValidateForm Model="@LoginVo" OnValidSubmit="OnValidSubmit">
+        <FloatingLabel DisplayText="用户名" @bind-Value="@LoginVo.UserName" IsGroupBox="true" PlaceHolder="请输入用户名" />
+        <FloatingLabel DisplayText="密码" @bind-Value="@LoginVo.Password" type="password" IsGroupBox="true" PlaceHolder="password" />
+        <Checkbox @bind-Value="@LoginVo.IsKeep" ShowLabel="false" ShowAfterLabel="true" DisplayText="记住登录状态" />
+        <Button Text="登录" Color="Color.Primary" ButtonType="ButtonType.Submit"></Button>
+   </ValidateForm>
+</div>
+
+@code
+{
+    private LoginVo LoginVo { get; set; } = new LoginVo();
+
+    private async Task OnValidSubmit(EditContext arg)
+    {
+        var document = await AjaxService.InvokeAsync(new AjaxOption()
+        {
+            Url = "/api/Account/Login",
+            Data = LoginVo
+        });
+        if (document?.RootElement.GetProperty("code").GetInt32() == 20000)
+        {
+            await AjaxService.Goto("/");
+        }
+        else
+        {
+            await SwalService.Show(new SwalOption()
+            {
+                Category = SwalCategory.Error,
+                Content = document?.RootElement.GetProperty("message").GetString() ?? "系统异常",
+                Title = "登录失败"
+            });
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user?.Identity?.IsAuthenticated == true)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

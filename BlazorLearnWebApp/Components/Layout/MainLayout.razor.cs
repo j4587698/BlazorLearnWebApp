@@ -1,4 +1,5 @@
-﻿using BootstrapBlazor.Components;
+﻿using System.Security.Claims;
+using BootstrapBlazor.Components;
 using Microsoft.AspNetCore.Components;
 
 namespace BlazorLearnWebApp.Components.Layout;
@@ -52,6 +53,8 @@ public partial class MainLayout
     [Parameter]
     public bool UseTabSet { get; set; } = true;
 
+    private ClaimsPrincipal? _user;
+
     /// <summary>
     /// OnInitializedAsync 方法
     /// </summary>
@@ -60,6 +63,7 @@ public partial class MainLayout
     {
         await base.OnInitializedAsync();
 
+        _user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         // 模拟异步获取菜单数据
         await Task.Delay(10);
 
