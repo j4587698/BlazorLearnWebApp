@@ -3,9 +3,9 @@
 @inject IDataService<MenuEntity> DataService
 
 @attribute [TabItemOption(Text = "菜单管理")]
-<AdminTable TItem="MenuEntity" OnSaveAsync="OnSaveAsync" OnDeleteAsync="OnDeleteAsync" IsTree="true" TreeNodeConverter="TreeNodeConverter">
+<AdminTable TItem="MenuEntity" OnSaveAsync="OnSaveAsync" OnDeleteAsync="OnDeleteAsync" IsTree="true" TreeNodeConverter="TreeNodeConverter" IsPagination="false" IsMultipleSelect="true">
     <TableColumns>
-        <TableColumn @bind-Field="@context.MenuName"></TableColumn>
+        <TableColumn @bind-Field="@context.MenuName" Filterable="true" Sortable="true"></TableColumn>
         <TableColumn @bind-Field="@context.Icon"></TableColumn>
         <TableColumn @bind-Field="@context.Url"></TableColumn>
         <TableColumn @bind-Field="@context.ParentId" Visible="false" Text="父菜单">

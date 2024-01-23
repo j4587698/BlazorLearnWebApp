@@ -27,5 +27,9 @@ public partial class AdminTable<TItem> where TItem : class, new()
     [Parameter] public RenderFragment<TItem>? BeforeRowButtonTemplate { get; set; }
     
     [Parameter] public RenderFragment<TItem>? RowButtonTemplate { get; set; }
+
+    [Parameter] public bool IsPagination { get; set; } = true;
+    
+    [Parameter] public bool IsMultipleSelect { get; set; } = false;
     
 }

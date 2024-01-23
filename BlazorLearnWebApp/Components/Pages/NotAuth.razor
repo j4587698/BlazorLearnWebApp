@@ -1,0 +1,16 @@
+﻿@page "/NotAuth"
+@using BlazorLearnWebApp.Components.Layout
+
+@layout LoginLayout
+
+@attribute [AllowAnonymous]
+
+<div class="login-item login-item-floating">
+    <div class="text-center">
+        <h4 class="text-dark">对不起，您没有权限访问此目录，点击<a href="/">跳转到主页</a>，如果您有疑问，请联系管理员</h4>
+    </div>
+</div>
+
+@code {
+    
+}

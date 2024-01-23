@@ -22,6 +22,7 @@ public class AccountController : ControllerBase
 
         var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
         identity.AddClaim(new Claim(ClaimTypes.Name, user.UserName!));
+        identity.AddClaim(new Claim(ClaimTypes.Role, user.RoleId.ToString()));
 
         HttpContext.SignInAsync(new ClaimsPrincipal(identity), new AuthenticationProperties()
         {

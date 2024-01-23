@@ -1,5 +1,6 @@
 ﻿@page "/role"
 @using BlazorLearnWebApp.Entity
+@using Console = System.Console
 @inject DialogService DialogService
 
 @attribute [TabItemOption(Text = "角色管理")]
@@ -17,15 +18,18 @@
 
 @code {
 
-    private void EditMenu(int roleId)
+    private async Task EditMenu(int roleId)
     {
-        DialogService.ShowModal<EditMenu>(new ResultDialogOption()
+        List<MenuEntity> menuEntities = new List<MenuEntity>();
+        await DialogService.ShowModal<EditMenu>(new ResultDialogOption()
         {
             ComponentParameters = new Dictionary<string, object>()
             {
                 [nameof(Components.EditMenu.RoleId)] = roleId,
+                [nameof(Components.EditMenu.MenuCallback)] = new Action<List<MenuEntity>>(list => menuEntities = list)
             }
         });
+        Console.WriteLine(menuEntities.Count);
     }
 
 }

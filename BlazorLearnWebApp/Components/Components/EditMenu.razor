@@ -11,6 +11,12 @@
     [Parameter]
     public int RoleId { get; set; }
     
+    [Parameter]
+    public List<MenuEntity>? MenuEntities { get; set; }
+    
+    [Parameter]
+    public Action<List<MenuEntity>>? MenuCallback { get; set; }
+    
     private RoleEntity? RoleEntity { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -49,6 +55,7 @@
             GetMenus(Items.Where(x => x.CheckedState != CheckboxState.UnChecked), menus);
             RoleEntity!.Menus = menus;
             await RoleEntity.SaveManyAsync(nameof(RoleEntity.Menus));
+            MenuCallback?.Invoke(menus);
         }
     }
 

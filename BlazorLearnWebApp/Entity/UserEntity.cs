@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using BlazorLearnWebApp.Attributes;
 using FreeSql;
 using FreeSql.DataAnnotations;
 
@@ -8,6 +10,8 @@ namespace BlazorLearnWebApp.Entity;
 public class UserEntity : BaseEntity<UserEntity, int>
 {
     [Description("用户名")]
+    [Required(ErrorMessage = "用户名不能为空")]
+    [User(ErrorMessage = "用户名不能重复")]
     public string? UserName { get; set; }
 
     [Description("密码")]
