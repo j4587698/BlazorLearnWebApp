@@ -1,22 +1,32 @@
 ﻿@page "/user"
 @using BlazorLearnWebApp.Components.Components
 @using BlazorLearnWebApp.Entity
+@using MiniExcelLibs
 
 @inject IDataService<UserEntity> DataService
 @inject SwalService SwalService
+@inject DownloadService DownloadService
 
 @attribute [TabItemOption(Text = "用户管理", Icon = "fa-fw fa-solid fa-desktop")]
-<AdminTable TItem="UserEntity" OnSaveAsync="OnSaveAsync">
+<AdminTable TItem="UserEntity" OnSaveAsync="OnSaveAsync" @ref="_adminTable">
     <TableColumns>
         <TableColumn @bind-Field="@context.UserName" IsReadonlyWhenEdit="true"></TableColumn>
         <TableColumn @bind-Field="@context.NickName"></TableColumn>
         <TableColumn @bind-Field="@context.RoleId" Text="角色" LookupServiceKey="role"></TableColumn>
     </TableColumns>
+    <TableExtensionToolbarTemplate>
+        <ButtonUpload TValue="string" ShowUploadFileList="false" BrowserButtonClass="btn-secondary" BrowserButtonText="导入" OnChange="OnChange" />
+    </TableExtensionToolbarTemplate>
+    <TableToolbarTemplate>
+        <TableToolbarButton Text="下载模板" OnClick="DownloadTemplate"></TableToolbarButton>
+    </TableToolbarTemplate>
     <RowButtonTemplate Context="value">
         <TableCellPopconfirmButton Text="重置密码" Content=@($"你是否要重置{value.UserName}的密码？") OnConfirm="() => ResetPassword(value)"></TableCellPopconfirmButton>
     </RowButtonTemplate>
 </AdminTable>
 @code {
+
+    private AdminTable<UserEntity> _adminTable;
 
     private async Task<bool> OnSaveAsync(UserEntity arg1, ItemChangedType arg2)
     {
@@ -48,6 +58,36 @@
             Title = "重置密码成功",
             Content = $"您的密码是{user.UserName}"
         });
+    }
+
+    private void DownloadTemplate()
+    {
+        DownloadService.DownloadFromFileAsync("用户模板.xlsx", "./Asset/user_template.xlsx");
+    }
+
+    private async Task OnChange(UploadFile uploadFile)
+    {
+        if (uploadFile.GetExtension() != ".xlsx")
+        {
+            await SwalService.Show(new SwalOption()
+            {
+                Content = "只支持上传.xlsx的excel文件",
+                Category = SwalCategory.Error
+            });
+            return;
+        }
+
+        var stream = new MemoryStream();
+        await uploadFile.File!.OpenReadStream().CopyToAsync(stream);
+        var users = await stream.QueryAsync<UserEntity>();
+        var role = await RoleEntity.Select.Where(x => x.RoleName == "管理员").FirstAsync();
+        foreach (var user in users)
+        {
+            user.RoleId = role.Id;
+            await user.SaveAsync();
+        }
+
+        await _adminTable.QueryAsync();
     }
 
 }
