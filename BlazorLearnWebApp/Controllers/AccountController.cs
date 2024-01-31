@@ -3,6 +3,7 @@ using BlazorLearnWebApp.Entity;
 using BlazorLearnWebApp.Vo;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorLearnWebApp.Controllers;
@@ -12,7 +13,7 @@ namespace BlazorLearnWebApp.Controllers;
 public class AccountController : ControllerBase
 {
     [HttpPost]
-    public object Login([FromBody]LoginVo loginVo)
+    public async Task<object> Login([FromBody]LoginVo loginVo)
     {
         var user = UserEntity.Where(x => x.UserName == loginVo.UserName && x.Password == loginVo.Password).First();
         if (user == null)
@@ -24,11 +25,19 @@ public class AccountController : ControllerBase
         identity.AddClaim(new Claim(ClaimTypes.Name, user.UserName!));
         identity.AddClaim(new Claim(ClaimTypes.Role, user.RoleId.ToString()));
 
-        HttpContext.SignInAsync(new ClaimsPrincipal(identity), new AuthenticationProperties()
+        await HttpContext.SignInAsync(new ClaimsPrincipal(identity), new AuthenticationProperties()
         {
             IsPersistent = true,
             ExpiresUtc = loginVo.IsKeep ? DateTimeOffset.Now.AddDays(5) : DateTimeOffset.Now.AddMinutes(30)
         });
         return new { Code = 20000, Message = "登录成功" };
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync();
+        return Redirect("/Login");
     }
 }

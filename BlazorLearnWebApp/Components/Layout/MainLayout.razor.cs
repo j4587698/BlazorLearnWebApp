@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using BlazorLearnWebApp.Components.Components;
 using BlazorLearnWebApp.Entity;
 using BootstrapBlazor.Components;
 using Microsoft.AspNetCore.Components;
@@ -57,6 +58,8 @@ public partial class MainLayout
 
     private ClaimsPrincipal? _user;
 
+    private UserEntity? _userEntity;
+
     private List<string> _authUrl = new List<string>();
 
     /// <summary>
@@ -73,6 +76,9 @@ public partial class MainLayout
         {
             return;
         }
+
+        var userName = _user.FindFirst(ClaimTypes.Name)?.Value;
+        _userEntity = await UserEntity.Where(x => x.UserName == userName).FirstAsync();
 
         var roleId = _user.FindFirst(ClaimTypes.Role)?.Value;
         if (roleId == null)
@@ -115,5 +121,19 @@ public partial class MainLayout
             return Task.FromResult(true);
         }
         return Task.FromResult(true);
+    }
+    
+    private void ChangePassword()
+    {
+        DialogService.Show(new DialogOption()
+        {
+            ShowFooter = false,
+            Title = "修改密码",
+            Size = Size.Medium,
+            BodyTemplate = BootstrapDynamicComponent.CreateComponent<ChangePassword>(new Dictionary<string, object?>()
+            {
+                [nameof(BlazorLearnWebApp.Components.Components.ChangePassword.UserEntity)] = _userEntity
+            }).Render()
+        });
     }
 }
