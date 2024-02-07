@@ -22,6 +22,9 @@ public class UserEntity : BaseEntity<UserEntity, int>
     [DisplayName("显示名")]
     public string? NickName { get; set; }
 
+    [DisplayName("头像地址")]
+    public string? AvatarPath { get; set; }
+
     [Description("角色Id")]
     public int RoleId { get; set; }
 

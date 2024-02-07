@@ -62,6 +62,12 @@ public partial class MainLayout
 
     private List<string> _authUrl = new List<string>();
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        DispatchService.Subscribe(Notify);
+    }
+
     /// <summary>
     /// OnInitializedAsync 方法
     /// </summary>
@@ -79,8 +85,12 @@ public partial class MainLayout
 
         var userName = _user.FindFirst(ClaimTypes.Name)?.Value;
         _userEntity = await UserEntity.Where(x => x.UserName == userName).FirstAsync();
+        RefreshMenu();
+    }
 
-        var roleId = _user.FindFirst(ClaimTypes.Role)?.Value;
+    private void RefreshMenu()
+    {
+        var roleId = _user!.FindFirst(ClaimTypes.Role)?.Value;
         if (roleId == null)
         {
             return;
@@ -135,5 +145,42 @@ public partial class MainLayout
                 [nameof(BlazorLearnWebApp.Components.Components.ChangePassword.UserEntity)] = _userEntity
             }).Render()
         });
+    }
+
+    private async Task Notify(DispatchEntry<int> payload)
+    {
+        if (payload.Name == Constant.RefreshMenuKey && _userEntity?.RoleId == payload.Entry)
+        {
+            RefreshMenu();
+            await InvokeAsync(StateHasChanged);
+            await ToastService.Show(new ToastOption()
+            {
+                Title = "test",
+                Content = "Refresh"
+            });
+        }
+    }
+
+    public void Dispose()
+    {
+        DispatchService.UnSubscribe(Notify);
+    }
+
+    private async Task UploadAvatar()
+    {
+        var result = await DialogService.ShowModal<UploadAvatar>(new ResultDialogOption()
+        {
+            ShowFooter = true,
+            Title = "更新头像",
+            Size = Size.Medium,
+            ComponentParameters = new Dictionary<string, object>()
+            {
+                [nameof(BlazorLearnWebApp.Components.Components.UploadAvatar.UserEntity)] = _userEntity
+            }
+        });
+        if (result == DialogResult.Yes)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }

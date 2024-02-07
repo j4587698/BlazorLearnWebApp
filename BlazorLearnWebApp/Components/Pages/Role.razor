@@ -2,6 +2,7 @@
 @using BlazorLearnWebApp.Entity
 @using Console = System.Console
 @inject DialogService DialogService
+@inject IDispatchService<int> DispatchService
 
 @attribute [TabItemOption(Text = "角色管理")]
 
@@ -21,7 +22,7 @@
     private async Task EditMenu(int roleId)
     {
         List<MenuEntity> menuEntities = new List<MenuEntity>();
-        await DialogService.ShowModal<EditMenu>(new ResultDialogOption()
+        var result = await DialogService.ShowModal<EditMenu>(new ResultDialogOption()
         {
             ComponentParameters = new Dictionary<string, object>()
             {
@@ -29,6 +30,14 @@
                 [nameof(Components.EditMenu.MenuCallback)] = new Action<List<MenuEntity>>(list => menuEntities = list)
             }
         });
+        if (result == DialogResult.Yes)
+        {
+            DispatchService.Dispatch(new DispatchEntry<int>()
+            {
+                Name = Constant.RefreshMenuKey,
+                Entry = roleId
+            });
+        }
         Console.WriteLine(menuEntities.Count);
     }
 

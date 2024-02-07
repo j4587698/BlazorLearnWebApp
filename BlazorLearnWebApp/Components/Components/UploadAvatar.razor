@@ -1,0 +1,62 @@
+﻿@using BlazorLearnWebApp.Entity
+@inject IWebHostEnvironment WebHostEnvironment
+@inject ToastService ToastService
+@implements IResultDialog
+现头像：<br/>
+<Avatar Url="@(UserEntity?.AvatarPath ?? "./images/Argo-C.png")" IsCircle="true" Size="Size.ExtraExtraLarge" />
+<br/>
+要上传的头像：
+<AvatarUpload TValue="string" Accept="image/*" IsSingle="true" OnChange="@OnAvatarUpload" ></AvatarUpload>
+
+@code {
+
+    [Parameter]
+    public UserEntity? UserEntity { get; set; }
+
+    private string? _uploadPath;
+    
+    private async Task OnAvatarUpload(UploadFile arg)
+    {
+        if (UserEntity == null)
+        {
+            await ToastService.Warning("上传失败", "用户信息为空");
+            arg.Code = 1;
+            arg.Error = "用户信息为空";
+            return ;
+        }
+        if (arg.Size > 50 * 1024)
+        {
+            await ToastService.Warning("上传失败", "最大只能上传50k的头像");
+            arg.Code = 1;
+            arg.Error = "最大只能上传50k的头像";
+            return ;
+        }
+
+        if (arg.GetExtension() != ".jpeg" && arg.GetExtension() != ".jpg" && arg.GetExtension() != ".png")
+        {
+            await ToastService.Warning("上传失败", "只支持jpeg、jpg、png格式的图片");
+            arg.Code = 1;
+            arg.Error = "只支持jpeg、jpg、png格式的图片";
+            return ;
+        }
+        
+        _uploadPath = $"upload/{Guid.NewGuid()}{arg.GetExtension()}";
+        await arg.SaveToFileAsync(Path.Combine(WebHostEnvironment.WebRootPath, _uploadPath));
+        
+        arg.PrevUrl = _uploadPath;
+    }
+
+    public async Task OnClose(DialogResult result)
+    {
+        if (result == DialogResult.Yes)
+        {
+            if (!string.IsNullOrEmpty(UserEntity!.AvatarPath))
+            {
+                File.Delete(Path.Combine(WebHostEnvironment.WebRootPath, UserEntity.AvatarPath));
+            }
+            UserEntity!.AvatarPath = _uploadPath;
+            await UserEntity.SaveAsync();
+        }
+    }
+
+}

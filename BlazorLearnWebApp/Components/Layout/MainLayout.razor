@@ -3,6 +3,9 @@
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject DialogService DialogService
+@inject ToastService ToastService
+@inject IDispatchService<int> DispatchService
+@implements IDisposable
 
 <BootstrapBlazorRoot>
 <CascadingValue Value="this" IsFixed="true">
@@ -24,10 +27,13 @@
         <Header>
             <span class="ms-3 flex-fill">Bootstrap of Blazor</span>
             <Widget></Widget>
-            <Logout ImageUrl="./images/Argo-C.png" DisplayName="@_userEntity?.NickName" UserName="@_userEntity?.UserName" class="bg-primary">
+            <Logout ImageUrl="@(string.IsNullOrEmpty(_userEntity?.AvatarPath) ? "./images/Argo-C.png" : _userEntity.AvatarPath)" DisplayName="@_userEntity?.NickName" UserName="@_userEntity?.UserName" class="bg-primary">
                 <LinkTemplate>
                     <a @onclick="ChangePassword">
                         <i class="fa-solid fa-user"></i><span>个人中心</span>
+                    </a>
+                    <a @onclick="UploadAvatar">
+                        <i class="fa-solid fa-user"></i><span>更新头像</span>
                     </a>
                     <LogoutLink Url="/api/Account/Logout"/>
                 </LinkTemplate>

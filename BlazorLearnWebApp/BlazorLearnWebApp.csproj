@@ -18,6 +18,7 @@
   <ItemGroup>
     <Folder Include="Asset\" />
     <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\upload\" />
   </ItemGroup>
 
   <ItemGroup>
